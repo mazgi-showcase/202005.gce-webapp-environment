@@ -2,7 +2,17 @@
 
 ## What is this?
 
-This repository is a provisioning example of the GCP to serve a traditional Web Application.
+This repository is a provisioning example of the [Google Cloud Platform](https://cloud.google.com/) to serve a traditional Web Application.
+
+The example provision the system as composed below resources by [Terraform](https://www.terraform.io/).
+
+- Cloud Load Balancing
+- Cloud Armor
+- Compute Engine
+- Cloud SQL for MySQL
+- Memorystore for Redis
+
+![overview](docs/images/overview.png)
 
 ## Prepare
 
@@ -79,7 +89,12 @@ You should delegate the sub-domain with `name_servers` values you get.
 
 ![terraform-outputs](docs/images/terraform-outputs.png)
 
+## Test
+
+See [How to check the provisioned environment](how-to-check-the-provisioned-environment.md).
+
 ## Links
 
 - https://console.cloud.google.com/net-services/loadbalancing/advanced/sslCertificates/list
 - https://cloud.google.com/sql/docs/mysql/connect-admin-ip#connect-ssl
+- https://cloud.google.com/icons
