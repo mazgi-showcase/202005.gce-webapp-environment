@@ -6,6 +6,7 @@ This repository is a provisioning example of the [Google Cloud Platform](https:/
 
 The example provision the system as composed below resources by [Terraform](https://www.terraform.io/).
 
+- Cloud DNS
 - Cloud Load Balancing
 - Cloud Armor
 - Compute Engine
