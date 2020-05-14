@@ -1,0 +1,56 @@
+version: "3.7"
+
+services:
+  provisioning:
+    build:
+      context: Dockerfile.d/provisioning
+      args:
+        UID: ${UID:-0}
+        GID: ${GID:-0}
+    command:
+      - bash
+      - -c
+      - |
+        gcloud auth activate-service-account --key-file=/workspace/config/credentials/google-cloud-keyfile.json
+        gcloud auth configure-docker gcr.io --quiet
+        gsutil ls gs://${PROJECT_UNIQUE_ID}-provisioning/ > /dev/null 2>&1\
+        || gsutil mb gs://${PROJECT_UNIQUE_ID}-provisioning/
+        gsutil uniformbucketlevelaccess set on gs://${PROJECT_UNIQUE_ID}-provisioning/
+        gsutil versioning set on gs://${PROJECT_UNIQUE_ID}-provisioning/
+        gcloud services enable cloudresourcemanager.googleapis.com
+        gcloud services enable containerregistry.googleapis.com
+        sudo chown $$(id -u) /var/run/docker.sock
+        sudo chmod a+rwx /tmp/provisioning
+        terraform init -reconfigure -backend-config="bucket=${PROJECT_UNIQUE_ID}-provisioning"
+    environment:
+      - TF_DATA_DIR=/tmp/provisioning
+      - GOOGLE_CLOUD_KEYFILE_JSON=/workspace/config/credentials/google-cloud-keyfile.json
+      - GOOGLE_APPLICATION_CREDENTIALS=/workspace/config/credentials/google-cloud-keyfile.json
+      - CLOUDSDK_CORE_PROJECT
+      - PROJECT_UNIQUE_ID
+      - TF_VAR_gcp_project_id
+      - TF_VAR_project_unique_id
+      - TF_VAR_basename
+      - TF_VAR_basedomain
+      - TF_VAR_cidr_blocks_allow_http
+      - TF_VAR_cidr_blocks_allow_http_restricted
+      - TF_VAR_cidr_blocks_allow_ssh
+      - TF_VAR_cloud_sql_root_password
+      - TF_VAR_cloud_sql_writer_password
+      - TF_VAR_cloud_sql_reader_password
+      - TF_VAR_github_accounts_for_ssh
+    user: "${UID:-0}:${GID:-0}"
+    volumes:
+      - provisioning-tmp:/tmp/provisioning
+      - provisioning-home-root:/root # for macOS
+      - provisioning-home-developer:/home/developer
+      - /var/run/docker.sock:/var/run/docker.sock
+      - .:/workspace
+    working_dir: /workspace
+volumes:
+  provisioning-tmp:
+    driver: local
+  provisioning-home-root:
+    driver: local
+  provisioning-home-developer:
+    driver: local
